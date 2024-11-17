@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head',{title:"welcome"}) %>
+  </head>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <body>
+    <div class="container">
+      <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item title is-3"> ChatApp </a>
+
+          <a
+            role="button"
+            class="navbar-burger"
+            aria-label="menu"
+            aria-expanded="false"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <div>
+                <span class="tag is-white is-small"
+                  ><i
+                    id="userId"
+                    class="fa-regular fa-user m-1"
+                    data-userId="<%= name._id  %>"
+                  ></i
+                  ><%= name.username %></span
+                >
+              </div>
+              <div class="buttons">
+                <a class="button is-light is-danger is-small" href="#">
+                  <strong>logout</strong>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <h1 class="title is-4 mb-6">
+        List Of Users
+        <i class="fa-solid fa-users ml-2"></i>
+      </h1>
+
+      <div>
+        <% Users.forEach(user => { %>
+        <div class="box columns mb-5">
+          <div class="column is-three-fifths">
+            <span class="title is-5">
+              <i class="fa-solid fa-user mr-1"></i>
+              <%= (user.username).charAt(0).toUpperCase() +
+              (user.username).slice(1) %></span
+            >
+          </div>
+          <div class="column">
+            <span class="tag is-warning">1</span>
+          </div>
+          <div class="column">
+            <i
+              class="fa-solid fa-comments fa-2xl"
+              style="color: #74c0fc; cursor: pointer"
+              data-id="<%= user.id %>"
+              onclick="redirectToUserChat('<%= user._id %>')"
+            ></i>
+          </div>
+          <!-- online -->
+          <div class="column">
+            <i class="fa-solid fa-circle" data-idOnligne="<%= user.id %>"></i>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <script>
+      const socket = io();
+
+      const userId = document
+        .getElementById("userId")
+        .getAttribute("data-userId");
+
+      socket.on("connect", () => {
+        socket.emit("userId", userId);
+      });
+
+      socket.on("getOnlineUsers", (users) => {
+        const elements = document.querySelectorAll("i[data-idOnligne]");
+        elements.forEach((element) => {
+          const dataId = element.getAttribute("data-idOnligne");
+          if (users.includes(dataId)) {
+            element.style.color = "#90EE90";
+          } else {
+            element.style.color = "";
+          }
+        });
+      });
+
+      function redirectToUserChat(userId) {
+        window.location.href = `/chat/${userId}`;
+      }
+    </script>
+  </body>
+</html>

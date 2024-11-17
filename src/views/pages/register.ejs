@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head',{title:"register"}) %>
+  </head>
+  <body>
+    <div class="container">
+      <%- include('../partials/header',{href:"/login" , value:"login"}) %>
+
+      <form class="fixed-grid has-1-cols" method="post">
+        <div class="grid">
+          <div class="cell">
+            <label>Username</label>
+            <input
+              class="input"
+              type="text"
+              name="username"
+              placeholder="Username"
+              required
+            />
+          </div>
+          <div class="cell">
+            <label>Password</label>
+            <input
+              class="input"
+              type="password"
+              name="password"
+              placeholder="********"
+              required
+            />
+          </div>
+          <div class="cell">
+            <label>Confirm Password</label>
+            <input
+              class="input"
+              type="password"
+              name="cpassword"
+              placeholder="********"
+              required
+            />
+          </div>
+
+          <div class="cell">
+            <button class="button is-primary" type="submit">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

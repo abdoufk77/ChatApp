@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%- include('../partials/head',{title:"chat"}) %>
+    <style>
+      /* Personnalisation de la barre de défilement pour Webkit (Chrome, Safari, etc.) */
+      .box::-webkit-scrollbar {
+        width: 6px; /* Largeur de la barre de défilement */
+      }
+
+      .box::-webkit-scrollbar-track {
+        background: #f4f4f4d6; /* Couleur du fond de la barre de défilement */
+        border-radius: 10px; /* Coins arrondis de la piste */
+      }
+
+      .box::-webkit-scrollbar-thumb {
+        background: #fff; /* Couleur de la barre de défilement */
+        border-radius: 10px; /* Coins arrondis de la barre */
+      }
+
+      .box::-webkit-scrollbar-thumb:hover {
+        background: #f1f1f1; /* Couleur du thumb au survol */
+      }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item title is-3"> ChatApp </a>
+
+          <a
+            role="button"
+            class="navbar-burger"
+            aria-label="menu"
+            aria-expanded="false"
+          >
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <div>
+                <span class="tag is-white is-small"
+                  ><i
+                    id="userId"
+                    class="fa-regular fa-user m-1"
+                    data-userId="<%= name.id  %>"
+                  ></i
+                  ><%= name.username %></span
+                >
+              </div>
+              <div class="buttons">
+                <a class="button is-light is-danger is-small" href="#">
+                  <strong>logout</strong>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <h1 class="subtitle is-4">
+        <i class="fa-regular fa-user mr-2" style="color: #74c0fc"></i><%=
+        Other.username.charAt(0).toUpperCase() + Other.username.slice(1) %>
+      </h1>
+      <!-- conversation -->
+
+      <div
+        class="box columns is-flex is-flex-direction-column mb-5"
+        style="height: 380px; overflow-y: auto"
+        id="conversation"
+      >
+        <!-- s -->
+        <% if (messages) { %> <% messages.forEach(msg => { %>
+        <div
+          class="box column is-half <%= msg.senderId == name.id ? 'has-background-primary is-align-self-flex-end': '' %>"
+        >
+          <%= msg.message%>
+        </div>
+        <% }) %> <% } else { %>
+        <p>no messages</p>
+        <% } %>
+      </div>
+
+      <div class="box columns">
+        <div class="field column">
+          <p class="control has-icons-right">
+            <!-- target this -->
+            <input
+              id="InputMessage"
+              class="input"
+              type="text"
+              placeholder="message"
+            />
+            <span class="icon is-small is-right">
+              <i
+                class="fa-solid fa-paper-plane fa-lg"
+                style="color: #74c0fc"
+              ></i>
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <script>
+      const input = document.getElementById("InputMessage");
+      input.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          const inputValue = event.target.value.trim();
+          if (inputValue) {
+            envoyerMessage(inputValue);
+            input.value = "";
+          }
+        }
+      });
+
+      function envoyerMessage(msg) {
+        const pathParts = window.location.pathname.split("/");
+        const id = pathParts[pathParts.length - 1];
+        const url = `/chat/send/${id}`;
+
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: msg }),
+        });
+
+        sendMessage(id, msg);
+      }
+
+      const socket = io();
+
+      const userId = document
+        .getElementById("userId")
+        .getAttribute("data-userId");
+
+      socket.on("connect", () => {
+        socket.emit("userId", userId);
+      });
+
+      const sendMessage = (receiverId, message) => {
+        socket.emit("sendMessage", { senderId: userId, receiverId, message });
+        addNewMessage("you", message);
+      };
+
+      socket.on("receiveMessage", ({ senderId, message }) => {
+        addNewMessage(senderId, message);
+      });
+
+      socket.on("newMessage", (messages) => {
+        console.log(messages);
+      });
+
+      function addNewMessage(senderId, message) {
+        const messagesContainer = document.getElementById("conversation");
+        let style = "";
+        if (senderId == "you") {
+          style = "has-background-primary is-align-self-flex-end";
+        }
+        const newMessage = `
+        <div
+          class="box column is-half ${style}"
+        >
+          ${message}
+        </div>
+        `;
+
+        messagesContainer.insertAdjacentHTML("beforeend", newMessage);
+
+        // messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        messagesContainer.scrollTo({
+          top: messagesContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      window.onload = function () {
+        const messagesContainer = document.getElementById("conversation");
+        messagesContainer.scrollTo({
+          top: messagesContainer.scrollHeight,
+          behavior: "smooth",
+        });
+      };
+    </script>
+  </body>
+</html>
