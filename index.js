@@ -35,6 +35,9 @@ app.use("/register", registerRoute);
 app.use("/chat", chatRoute);
 app.use("/chat", messageRoute);
 
+app.use((req, res) => {
+  res.status(404).render("404");
+});
 /*--------------End using routes--------------*/
 
 server.listen(PORT, () => {

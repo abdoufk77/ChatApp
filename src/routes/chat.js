@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 const user = require("../models/user.model");
 const conversation = require("../models/conversation.model");
+const checkAuthenticated = require("../middleware/auth.middelware");
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", checkAuthenticated, async (req, res) => {
   try {
     const receiverId = req.params.id;
     const senderId = req.session.userId;

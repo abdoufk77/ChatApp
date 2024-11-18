@@ -1,8 +1,9 @@
 const express = require("express");
 const user = require("../models/user.model");
 const router = express.Router();
+const checkAuthenticated = require("../middleware/auth.middelware");
 
-router.get("/", async (req, res) => {
+router.get("/", checkAuthenticated, async (req, res) => {
   try {
     const MonUserId = req.session.userId;
     const [u, users] = await Promise.all([

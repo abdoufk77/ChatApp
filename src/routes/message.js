@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const conversation = require("../models/conversation.model");
 const msg = require("../models/message.model");
-const { userSocketMap } = require("../socket/socket");
+const checkAuthenticated = require("../middleware/auth.middelware");
 
-router.post("/send/:id", async (req, res) => {
+router.post("/send/:id", checkAuthenticated, async (req, res) => {
   try {
     const receiverId = req.params.id;
     const senderId = req.session.userId;
@@ -31,7 +31,6 @@ router.post("/send/:id", async (req, res) => {
     }
 
     await Promise.all([newMsg.save(), conv.save()]);
-    // io.to(users[receiverId]).emit('receiveMessage', { senderId, message });
 
     res.end();
   } catch (err) {
